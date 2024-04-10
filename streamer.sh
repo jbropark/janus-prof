@@ -52,5 +52,5 @@ gst-launch-1.0 \
                 audioresample ! audio/x-raw,channels=1,rate=16000 ! opusenc bitrate=200000 ! \
                         rtpopuspay ! udpsink host=$HOST port=$APORT \
         videotestsrc ! video/x-raw,width=320,height=240 ! \
-	            videoscale ! videorate ! videoconvert ! timeoverlay ! vp8enc target-bitrate=1000000 error-resilient=1 ! \
-                        rtpvp8pay ! udpsink host=$HOST port=$VPORT
+	            videoscale ! videorate ! videoconvert ! timeoverlay ! x264enc bitrate=1000000 ! \
+                        rtph264pay ! udpsink host=$HOST port=$VPORT
