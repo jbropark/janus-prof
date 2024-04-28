@@ -95,8 +95,8 @@ case "$subcommand" in
 		--rm -d --network host --name wrtt-client-$COUNT \
 		--entrypoint /home/workspace/webrtc-testing-tool-ubuntu-20.04_x86_64/bin/wrtt \
 		$IMAGE \
-		--log-level=3 --signaling-urls=$URL \
-		--insecure=true --the-number-of-client=200 \
+		--log-level=4 --signaling-urls=$URL \
+		--insecure=false --the-number-of-client=200 \
 		--openh264-path=/home/workspace/webrtc-testing-tool-ubuntu-20.04_x86_64/openh264/lib/libopenh264-2.1.1-linux64.6.so \
 		--hatch-rate=500 --client-role=streaming janus --room-id=1
         COUNT=$((COUNT + 1))
