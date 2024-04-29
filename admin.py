@@ -402,7 +402,7 @@ def try_handle_info(session_id, handle_id):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sample", default=100, type=int)
-    parser.add_argument("--verbose", dest="v", action="store_true")
+    parser.add_argument("-v", "--verbose", dest="v", action="store_true")
     return parser.parse_args()
 
 
@@ -418,13 +418,18 @@ def main():
     print(f"Samp: {sample_count}")
 
     sessions = random.sample(resp.sessions, k=sample_count)
-    tuples = [t for t in tqdm.tqdm(iter_session_handle_tuples(sessions), "handle", disable=not args.v)]
+    tuples = [
+        t for t in tqdm.tqdm(
+            iter_session_handle_tuples(sessions), "handle",
+            total=len(sessions), disable=not args.v,
+        )
+    ]
 
     # print(get_handle_info(*tuples[0]))
     # return
 
     try_info1s = [try_handle_info(*t) for t in tqdm.tqdm(tuples, "info1", disable=not args.v)]
-    info1s = [info for info in try_info1s]
+    info1s = [info for info in try_info1s if info is not None]
     print(f"Norm: {len(info1s)}")
 
     thr_arr = measure_throughput()
