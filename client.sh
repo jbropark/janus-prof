@@ -15,6 +15,8 @@ usage_start() {
   echo "  -i image   Image name (default: )" 1>&2
   echo "  -n num     Number to create" 1>&2
   echo "  -u url     URL for janus-gateway" 1>&2
+  echo "  -p port    PORT for janus-gateway (if url not given)" 1>&2
+  echo "  -h host    URL for janus-gateway (if url not given)" 1>&2
   exit 1
 }
 
@@ -50,19 +52,27 @@ subcommand=$1
 shift
 
 NUM=1
-URL="ws://127.0.0.1:8188/janus"
+URL=""
+HOST="172.20.0.2"
+PORT="8188"
 
 case "$subcommand" in
   start)
     # Parse arguments for 'start' subcommand
     parse_start_args() {
-      while getopts ":n:u:" opt; do
+      while getopts ":n:u:h:p:" opt; do
         case ${opt} in
           n )
             NUM=$OPTARG
             ;;
 	  u )
 	    URL=$OPTARG
+	    ;;
+	  p )
+	    PORT=$OPTARG
+	    ;;
+	  h )
+	    HOST=$OPTARG
 	    ;;
           \? )
             echo "Invalid option: $OPTARG" 1>&2
@@ -75,6 +85,10 @@ case "$subcommand" in
         esac
       done
       shift $((OPTIND -1))
+
+      if [ -z "$URL" ]; then
+        URL="ws://$HOST:$PORT/janus"
+      fi
       
       # Usage if required arguments are not provided
       if [[ -z $IMAGE || -z $NUM || -z $URL ]]; then
@@ -85,6 +99,8 @@ case "$subcommand" in
     
     parse_start_args "$@"
     # start subcommand
+
+
     echo "URL: $URL"
     echo "Num  : $NUM"
     echo "Image: $IMAGE"

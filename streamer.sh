@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-HOST="127.0.0.1"
+HOST="172.20.0.2"
 PORT=5002
 
 # Function to display usage information
@@ -51,6 +51,6 @@ gst-launch-1.0 \
         audiotestsrc ! \
                 audioresample ! audio/x-raw,channels=1,rate=16000 ! opusenc bitrate=200000 ! \
                         rtpopuspay ! udpsink host=$HOST port=$APORT \
-        videotestsrc ! video/x-raw,width=320,height=240 ! \
-	            videoscale ! videorate ! videoconvert ! timeoverlay ! vp8enc target-bitrate=1000000 error-resilient=1 ! \
+        videotestsrc ! video/x-raw,width=640,height=480 ! \
+	            videoscale ! videorate ! videoconvert ! timeoverlay ! vp8enc target-bitrate=4000000 error-resilient=1 ! \
                         rtpvp8pay ! udpsink host=$HOST port=$VPORT

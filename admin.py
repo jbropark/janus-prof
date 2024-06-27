@@ -14,6 +14,7 @@ import dataclasses_json
 from dataclasses_json import config as djs_config
 from dataclasses_json import dataclass_json, LetterCase, Undefined
 
+SHOW_DATA_ON_PARSING_ERROR = False
 
 URL = "http://127.0.0.1:7088/admin"
 ADMIN_SECRET = "janusoverlord"
@@ -97,7 +98,6 @@ class JanusDTLS:
     ready: bool
     handshake_started: int
     connected: int
-    sctp_association: bool
     stats: JanusStats
 
 
@@ -208,7 +208,8 @@ class JanusResponseBase:
         try:
             return cls.from_dict(data)
         except KeyError:
-            print(data)
+            if SHOW_DATA_ON_PARSING_ERROR:
+                print(data, file=sys.stderr)
             raise
 
 
@@ -287,7 +288,7 @@ def get_handle_info(session_id: int, handle_id: int):
     return _request_handle_info("handle_info", session_id, handle_id)
 
 
-def start_pcap(session_id, handle_id):
+def start_pcap(session_id: int, handle_id: int):
     return _request(
         "start_pcap",
         {"session_id": session_id, "handle_id": handle_id, "folder": "/home/janus", "filename": "unencrypt.pcap"}
@@ -391,7 +392,17 @@ def measure_throughput(n: int = 10, delta: int = 1):
     return np.array(res)
 
 
-def try_handle_info(session_id, handle_id):
+def get_tuples_from_sessions(sessions: List[int], verbose: bool = False):
+    return [
+        t for t in tqdm.tqdm(
+            iter_session_handle_tuples(sessions), "handle",
+            total=len(sessions), disable=not verbose,
+        )
+    ]
+
+
+
+def try_handle_info(session_id: int, handle_id: int):
     try:
         return get_handle_info(session_id, handle_id).info
     except KeyError as error:
@@ -399,34 +410,67 @@ def try_handle_info(session_id, handle_id):
         return None
 
 
+def sample_sessions(sessions: List[int], sample: int, is_all: int):
+    if is_all:
+        return sessions
+    
+    sample_count = min(len(sessions), sample)
+    return random.sample(sessions, k=sample_count)
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample", default=100, type=int)
-    parser.add_argument("-v", "--verbose", dest="v", action="store_true")
+
+    base_parser = argparse.ArgumentParser(description="The parent parser", add_help=False)
+    base_parser.add_argument("-n", "--sample", dest="sample", default=100, type=int)
+    base_parser.add_argument("-a", "--all", dest="all", action="store_true")
+    base_parser.add_argument("-v", "--verbose", dest="v", action="store_true")
+    base_parser.add_argument("--json", action="store_true")
+
+    subparsers = parser.add_subparsers(dest='command', help='admin status', required=True)
+
+    parser_c = subparsers.add_parser('check', help="check connection status", parents=[base_parser])
+
+    parser_m = subparsers.add_parser('measure', help='measure status', parents=[base_parser])
+
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-
+def check(args: argparse.Namespace):
     resp = get_list_sessions()
-    len_sessions = len(resp.sessions)
+    sessions = sample_sessions(resp.sessions, args.sample, args.all)
+    tuples = get_tuples_from_sessions(sessions, args.v)
+    
+    total = len(tuples)
+    error_counter = dict()
 
-    print(f"Sess: {len_sessions}")
+    for session_id, handle_id in tuples:
+        try:
+            get_handle_info(session_id, handle_id)
+        except KeyError as error:
+            key = str(error)
+            error_counter[key] = error_counter.get(key, 0) + 1
 
-    sample_count = min(len_sessions, args.sample)
-    print(f"Samp: {sample_count}")
+    errors = sum(error_counter.values())
+    normal = total - errors
 
-    sessions = random.sample(resp.sessions, k=sample_count)
-    tuples = [
-        t for t in tqdm.tqdm(
-            iter_session_handle_tuples(sessions), "handle",
-            total=len(sessions), disable=not args.v,
-        )
-    ]
+    print(f"total : {total}")
+    print(f"normal: {normal}")
+    print(f"error : {errors}")
+    for key, count in error_counter.items():
+        print(f"- No {key[1: -1]}: {count}")
 
-    # print(get_handle_info(*tuples[0]))
-    # return
+    sys.exit(1 if errors > 0 else 0)
+
+
+def measure(args: argparse.Namespace):
+    resp = get_list_sessions()
+    print(f"Sess: {len(resp.sessions)}")
+
+    sessions = sample_sessions(resp.sessions, args.sample, args.all)
+    print(f"Samp: {len(sessions)}")
+
+    tuples = get_tuples_from_sessions(sessions, args.v)
 
     try_info1s = [try_handle_info(*t) for t in tqdm.tqdm(tuples, "info1", disable=not args.v)]
     info1s = [info for info in try_info1s if info is not None]
@@ -434,6 +478,9 @@ def main():
 
     thr_arr = measure_throughput()
     print_array("Thro", thr_arr)
+
+    if not try_info1s:
+        return
 
     info2s = [
         get_handle_info(info.session_id, info.handle_id).info
@@ -455,15 +502,16 @@ def main():
     print_array("Lost", lost_rates)
     print_array("Jitt", jitters)
 
-    return
 
-    tuples = list(iter_all_session_handle_tuples())
-    print(f"Find {len(tuples)} tuples")
-    p1, n1 = get_packet_and_nack(tuples)
-    time.sleep(5)
-    p2, n2 = get_packet_and_nack(tuples)
-    dp, dn = p2 - p1, n2 - n1
-    print(dp, dn, dn / dp if dp else float("nan"))
+def main():
+    args = parse_args()
+
+    if args.command == "check":
+        check(args)
+    elif args.command == "measure":
+        measure(args)
+    else:
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
