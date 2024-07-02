@@ -91,7 +91,7 @@ case "$subcommand" in
       fi
       
       # Usage if required arguments are not provided
-      if [[ -z $IMAGE || -z $NUM || -z $URL ]]; then
+      if [ -z $IMAGE ] || [ -z $NUM ] || [ -z $URL ]; then
         echo "Required argument(s) missing" 1>&2
         usage_start
       fi
@@ -121,14 +121,14 @@ done
     ;;
   stop)
     # Usage if required arguments are not provided
-    if [[ -z $IMAGE ]]; then
+    if [ -z $IMAGE ]; then
       echo "Required argument(s) missing" 1>&2
       usage_stop
     fi
     
     # stop subcommand
-    CONTAINERS=$(docker ps -aq --filter ancestor=$IMAGE)
-    if [[ -z $CONTAINERS ]]; then
+    CONTAINERS=`docker ps -aq --filter ancestor=$IMAGE`
+    if [ -z $CONTAINERS ]; then
 	echo "Error: No containers found for image: $IMAGE"
 	exit 1
     fi

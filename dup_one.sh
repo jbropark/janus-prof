@@ -8,7 +8,7 @@ n="5"
 repeat="30"
 
 # getopts를 통해 명령줄 인수 파싱
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         --interval)
             interval="$2"
