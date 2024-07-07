@@ -60,3 +60,5 @@ for ((i = 1; i <= $repeat; i++)); do
   ./client.sh stop
   sleep $after
 done
+
+printf '\7'
