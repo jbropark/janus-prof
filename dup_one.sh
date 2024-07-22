@@ -2,7 +2,7 @@
 
 interval="10"
 after="0.1"
-host="172.20.0.2"
+host="192.168.125.2"
 port="8188"
 n="5"
 repeat="30"
