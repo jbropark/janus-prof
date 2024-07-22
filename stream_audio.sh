@@ -5,4 +5,4 @@ gst-launch-1.0 \
 		decodebin ! audioconvert ! audioresample ! \
                 opusenc bitrate=200000 ! \
                 rtpopuspay ! \
-                udpsink host=172.20.0.2 port=5002 \
+                udpsink host=192.168.1.13 port=5002 \
