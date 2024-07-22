@@ -13,7 +13,7 @@ for i in {1..10}
 do
 docker stats --format json --no-stream > "$DIR/dstat-$i.txt"
 sleep 0.1
-vnstat -tr 5 -i janus --json > "$DIR/vnstat-$i.txt"
+vnstat -tr 2 -i janus --json > "$DIR/vnstat-$i.txt"
 sleep 0.1
 vmstat 1 10 > "$DIR/vmstat-$i.txt"
 sleep 0.1

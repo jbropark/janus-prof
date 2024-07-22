@@ -16,7 +16,7 @@ from dataclasses_json import dataclass_json, LetterCase, Undefined
 
 SHOW_DATA_ON_PARSING_ERROR = False
 
-URL = "http://127.0.0.1:7088/admin"
+URL = "http://172.20.0.2:7088/admin"
 ADMIN_SECRET = "janusoverlord"
 
 
@@ -419,21 +419,19 @@ def sample_sessions(sessions: List[int], sample: int, is_all: int):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-
     base_parser = argparse.ArgumentParser(description="The parent parser", add_help=False)
+    base_parser.add_argument("command", choices=["check", "measure", "count"])
     base_parser.add_argument("-n", "--sample", dest="sample", default=100, type=int)
     base_parser.add_argument("-a", "--all", dest="all", action="store_true")
     base_parser.add_argument("-v", "--verbose", dest="v", action="store_true")
     base_parser.add_argument("--json", action="store_true")
 
-    subparsers = parser.add_subparsers(dest='command', help='admin status', required=True)
+    return base_parser.parse_args()
 
-    parser_c = subparsers.add_parser('check', help="check connection status", parents=[base_parser])
 
-    parser_m = subparsers.add_parser('measure', help='measure status', parents=[base_parser])
-
-    return parser.parse_args()
+def check_count(args: argparse.Namespace):
+    resp = get_list_sessions()
+    print(len(resp.sessions))
 
 
 def check(args: argparse.Namespace):
@@ -510,6 +508,8 @@ def main():
         check(args)
     elif args.command == "measure":
         measure(args)
+    elif args.command == "count":
+        check_count(args)
     else:
         raise NotImplementedError
 

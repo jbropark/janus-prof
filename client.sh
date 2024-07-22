@@ -14,6 +14,7 @@ usage_start() {
   echo "Options:" 1>&2
   echo "  -i image   Image name (default: )" 1>&2
   echo "  -n num     Number to create" 1>&2
+  echo "  -c client  Number of client" 1>&2
   echo "  -u url     URL for janus-gateway" 1>&2
   echo "  -p port    PORT for janus-gateway (if url not given)" 1>&2
   echo "  -h host    URL for janus-gateway (if url not given)" 1>&2
@@ -52,6 +53,7 @@ subcommand=$1
 shift
 
 NUM=1
+CLIENT=200
 URL=""
 HOST="172.20.0.2"
 PORT="8188"
@@ -60,7 +62,7 @@ case "$subcommand" in
   start)
     # Parse arguments for 'start' subcommand
     parse_start_args() {
-      while getopts ":n:u:h:p:" opt; do
+      while getopts ":n:u:h:p:c:" opt; do
         case ${opt} in
           n )
             NUM=$OPTARG
@@ -73,6 +75,9 @@ case "$subcommand" in
 	    ;;
 	  h )
 	    HOST=$OPTARG
+	    ;;
+	  c )
+            CLIENT=$OPTARG
 	    ;;
           \? )
             echo "Invalid option: $OPTARG" 1>&2
@@ -103,6 +108,7 @@ case "$subcommand" in
 
     echo "URL: $URL"
     echo "Num  : $NUM"
+    echo "Client : $CLIENT"
     echo "Image: $IMAGE"
 
     COUNT=1
@@ -112,7 +118,7 @@ case "$subcommand" in
 		--entrypoint /home/workspace/webrtc-testing-tool-ubuntu-20.04_x86_64/bin/wrtt \
 		$IMAGE \
 		--log-level=4 --signaling-urls=$URL \
-		--insecure=false --the-number-of-client=200 \
+		--insecure=false --the-number-of-client=$CLIENT \
 		--openh264-path=/home/workspace/webrtc-testing-tool-ubuntu-20.04_x86_64/openh264/lib/libopenh264-2.1.1-linux64.6.so \
 		--hatch-rate=500 --client-role=streaming janus --room-id=1
         COUNT=$((COUNT + 1))
