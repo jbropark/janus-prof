@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-HOST="172.20.0.2"
+HOST="192.168.125.2"
 PORT=5002
 FRAMERATE=30
 BITRATE=1000000

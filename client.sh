@@ -55,7 +55,7 @@ shift
 NUM=1
 CLIENT=200
 URL=""
-HOST="172.20.0.2"
+HOST="192.168.125.2"
 PORT="8188"
 
 case "$subcommand" in
