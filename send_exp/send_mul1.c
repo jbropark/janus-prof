@@ -52,7 +52,7 @@ int main() {
         memset(&server_addr[j], 0, sizeof(server_addr[j]));
         server_addr[j].sin_family = AF_INET;
         server_addr[j].sin_port = htons(12345 + j);  // Change to desired port
-        server_addr[j].sin_addr.s_addr = inet_addr("192.168.1.14");  // Change to desired IP
+        server_addr[j].sin_addr.s_addr = inet_addr("192.168.125.3");  // Change to desired IP
     }
 
     clock_gettime(CLOCK_MONOTONIC, &start);
