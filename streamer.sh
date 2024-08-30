@@ -63,18 +63,22 @@ echo "BitRate: $BITRATE"
 echo "FrameRate: $FRAMERATE"
 echo "MTUARG: $MTUARG"
 
-gst-launch-1.0 \
+docker run \
+        --rm --network host \
+        restreamio/gstreamer:2024-07-19T10-11-18Z-prod \
+	gst-launch-1.0 \
         audiotestsrc ! \
-                audioresample ! \
-		audio/x-raw,channels=1,rate=16000 ! \
-		opusenc bitrate=200000 ! \
-                rtpopuspay ! \
-		udpsink host=$HOST port=$APORT \
+	        audioresample ! \
+                queue ! audio/x-raw,channels=4,rate=48000 ! \
+                queue ! opusenc bitrate=640000 ! \
+                queue ! rtpopuspay ! \
+                udpsink host=$HOST port=$APORT \
         videotestsrc ! \
-		video/x-raw,width=400,height=300,framerate=$FRAMERATE/1 ! \
+		queue ! video/x-raw,width=400,height=300,framerate=$FRAMERATE/1 ! \
 		videoscale ! \
 		videorate ! \
 		videoconvert ! \
 		timeoverlay ! \
-		vp8enc target-bitrate=$BITRATE error-resilient=1 ! \
-		rtpvp8pay mtu=$MTUARG ! udpsink host=$HOST port=$VPORT
+		queue ! vp8enc target-bitrate=$BITRATE error-resilient=1 ! \
+		queue ! rtpvp8pay mtu=$MTUARG ! \
+		udpsink host=$HOST port=$VPORT
