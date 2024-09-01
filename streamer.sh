@@ -69,7 +69,7 @@ docker run \
 	gst-launch-1.0 \
         audiotestsrc ! \
 	        audioresample ! \
-                queue ! audio/x-raw,channels=4,rate=48000 ! \
+                queue ! audio/x-raw,channels=2,rate=48000 ! \
                 queue ! opusenc bitrate=640000 ! \
                 queue ! rtpopuspay ! \
                 udpsink host=$HOST port=$APORT \

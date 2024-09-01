@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./streamer.sh --frame 90 --bit 7000000
+./streamer.sh --frame 80 --bit 6000000
