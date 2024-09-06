@@ -114,7 +114,7 @@ case "$subcommand" in
     COUNT=1
     while [ $COUNT -le $NUM ]; do
         docker run \
-		--rm -d --network host --name wrtt-client-$COUNT \
+		--rm -d --network host \
 		--entrypoint /home/workspace/webrtc-testing-tool-ubuntu-20.04_x86_64/bin/wrtt \
 		$IMAGE \
 		--log-level=4 --signaling-urls=$URL \

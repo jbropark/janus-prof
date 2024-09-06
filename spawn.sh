@@ -5,7 +5,8 @@ after="0.1"
 host="192.168.125.2"
 port="8188"
 n="5"
-repeat="30"
+c="200"
+repeat="10"
 
 # getopts를 통해 명령줄 인수 파싱
 while [ $# -gt 0 ]; do
@@ -26,6 +27,10 @@ while [ $# -gt 0 ]; do
             n="$2"
             shift 2
             ;;
+	-c)
+	    c="$2"
+	    shift 2
+	    ;;
         --repeat)
             repeat="$2"
             shift 2
@@ -51,6 +56,7 @@ echo "After: $after"
 echo "Host: $host"
 echo "Port: $port"
 echo "N: $n"
+echo "C: $c"
 echo "Repeat: $repeat"
 
 for ((i = 1; i <= $repeat; i++)); do
@@ -60,5 +66,8 @@ for ((i = 1; i <= $repeat; i++)); do
   ./client.sh stop
   sleep $after
 done
+
+TOTAL=$(($c * $n * $repeat))
+echo "Finish dup for $TOTAL clients (repeat: $repeat / n: $n / c: $c)"
 
 printf '\7'
