@@ -80,7 +80,7 @@ docker run -v $MYDIR:$DIR \
 	--rm \
 	restreamio/gstreamer:2024-07-19T10-11-18Z-prod \
 	gst-launch-1.0 \
-		multifilesrc location=$AUDIO loop=true ! \
+		filesrc location=$AUDIO ! \
 			oggdemux ! \
 			rtpopuspay mtu=$MTUARG ! \
 			udpsink host=$HOST port=$APORT \
